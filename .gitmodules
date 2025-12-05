@@ -1,0 +1,30 @@
+[submodule "skynet"]
+	path = skynet
+	url = https://github.com/cloudwu/skynet.git#v1.8.0
+[submodule "3rd/lua-openssl"]
+	path = 3rd/lua-openssl
+	url = https://github.com/zhaozg/lua-openssl.git#0.10.1
+[submodule "3rd/lua-rand"]
+    path = 3rd/lua-rand
+    url = https://github.com/walking-with-linght/lua-rand.git
+[submodule "3rd/lua-cjson"]
+    path = 3rd/lua-cjson
+    url = https://github.com/walking-with-linght/lua-cjson.git
+[submodule "3rd/lua-base64"]
+    path = 3rd/lua-base64
+    url = https://github.com/walking-with-linght/lua-base64.git
+[submodule "3rd/lua-tz"]
+    path = 3rd/lua-tz
+    url = https://github.com/walking-with-linght/lua-tz.git
+[submodule "3rd/lua-crypt"]
+    path = 3rd/lua-crypt
+    url = https://gitee.com/jslonely/lua-crypt.git
+[submodule "3rd/lua-protobuf"]
+    path = 3rd/lua-protobuf
+    url = https://github.com/starwing/lua-protobuf.git
+[submodule "3rd/lua-lfs"]
+    path = 3rd/lua-lfs
+    url = https://github.com/lunarmodules/luafilesystem.git
+[submodule "3rd/lua-consistent-hash"]  
+    path = 3rd/lua-consistent-hash
+    url = https://github.com/walking-with-linght/lua-consistent-hash.git

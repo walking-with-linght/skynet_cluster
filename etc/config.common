@@ -1,0 +1,63 @@
+root = "./"
+logger = "userlog"
+logservice = "snlua"
+logpath = "./"
+
+bootstrap = "snlua bootstrap" -- The service for bootstrap
+
+harbor = 0
+enablessl=false
+
+
+etcd_hosts = "http://127.0.0.1:2379"
+etcd_user = "root"
+etcd_password = "123456"
+etcd_base_path = "/skynet/"
+
+
+skynetroot = "./skynet/"
+
+
+lualoader = "skynet/lualib/loader.lua"
+
+luaservice = skynetroot .. "service/?.lua;" .. 
+            "./service/?.lua;"
+
+preload = "./lualib/preload/init.lua"	-- run preload.lua before every lua service run
+
+
+frame_work = "./"
+cpath = skynetroot .. "cservice/?.so;" .. frame_work .. "3rd/cservice/?.so"
+
+lua_cpath = skynetroot .. "luaclib/?.so;".. frame_work .. "3rd/cservice/?.so"
+
+lua_path =  skynetroot .. "lualib/?.lua;".. skynetroot .. "lualib/compat10/?.lua;" ..
+		    "./lualib/?.lua;".. "./lualib/?/init.lua;"
+
+
+
+-- 数据库连接数
+mysql_maxconn = 3
+
+db_host = "127.0.0.1"	    -- mysql数据库主机
+db_port = 13306		        -- mysql数据库端口
+db_db = "rank"      -- mysql数据库库名
+db_user = "root"             -- mysql数据库帐号
+db_pwd = "d3R38PKkFCmbTkfM"    -- mysql数据库密码
+
+
+
+redis_host  = "127.0.0.1"
+redis_port  = 6379
+redis_auth  = "bendanredis"
+redis_db    = 0
+
+gmail_email_host = "smtp.gmail.com"
+gmail_email_port = 465
+gmail_email_from = "*******@gmail.com"
+gmail_email_authcode = "uxnh*******egn"
+
+qq_email_host = "smtp.qq.com"
+qq_email_port = 465
+qq_email_from = "654146770@qq.com"
+qq_email_authcode = "cluzg*****ie"

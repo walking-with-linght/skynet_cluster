@@ -1,0 +1,26 @@
+.modal-content.ultra-compact {
+    max-width: 320px;
+    min-width: 120px;
+    padding: 14px 18px;
+    margin: 18% auto;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    font-size: 1rem;
+}
+
+/* 针对修改手机号弹窗，适当减小高度和内边距 */
+.modal-content.phone-verify-compact {
+    max-width: 360px;
+    padding: 18px 20px 12px 20px;
+    margin: 10% auto;
+     /* max-height: 80vh; */
+}
+
+/* 针对修改密码弹窗，允许更高的最大高度，防止内容溢出 */
+.modal-content.password-compact {
+    max-width: 400px;
+    max-height: 80vh;
+    padding: 22px 24px 16px 24px;
+    margin: 6% auto;
+    overflow-y: auto;
+}

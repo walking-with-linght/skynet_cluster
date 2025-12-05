@@ -1,0 +1,30 @@
+include "config.common"
+
+start = "rank_main"	-- main script
+
+-- 节点信息
+cluster_type = "rank"
+cluster_name = "rank1"
+cluster_addr = "127.0.0.1:25670"
+
+-- 开启debug
+console_port = 42213
+-- 排行榜HTTP接口
+rank_webport = 18010
+
+
+rank_mysql_host = "127.0.0.1"	    -- mysql数据库主机
+rank_mysql_port = 13306		        -- mysql数据库端口
+rank_mysql_db = "rank"      -- mysql数据库库名
+rank_mysql_user = "root"             -- mysql数据库帐号
+rank_mysql_pwd = "S6ksT5hNJ3xhaLdH"    -- mysql数据库密码
+
+rank_redis_host  = "127.0.0.1"
+rank_redis_port  = 26739
+rank_redis_auth  = "mBEcGJxkCYdJWDZ6"
+rank_redis_db    = 0
+
+
+
+luaservice = luaservice .. "./server/" .. cluster_type .. "/?.lua;"
+lua_path =  lua_path .. "./server/" .. cluster_type .. "/lualib/?.lua;"

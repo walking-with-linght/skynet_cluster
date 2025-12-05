@@ -1,0 +1,55 @@
+
+
+这是一个基于 redis服务发现的 skynet 基础封装版本
+
+编译：
+    cd skynet
+    make all
+    make linux
+
+    编译 3rd
+    cd 3rd/src-c
+    make all
+启动
+    sh start_xx.sh
+
+配置数据库和redis配置在etc/config.xx里
+
+
+  
+shell脚本说明
+    start_monitor.sh  
+    启动监控服务
+
+    start_moon.sh  
+    启动moon服务
+
+    start_rank.sh  
+    启动排行榜服务
+
+
+    pack_safe.sh
+    对 pack 文件夹内所有的lua文件加密（排除 skynet）
+
+    pack_unsafe.sh
+    没啥用
+
+    deploy.sh
+    打包到 pack 文件夹，去除无用的源文件
+
+    注意，如果要使用lua 文件加密，需要将 src_encrypt 中的文件夹替换到 skynet 文件夹中的同名文件夹，然后再重新编译 lua
+
+
+关于 cluster，如果要新增一个节点，在 etc 中新建一个 config.xxx 文件，修改必要数据，然后在 server 中新建对应的文件夹，启动文件默认为 xxx_main.lua
+    调用
+    local addr = skynet.uniqueservice("redis_discover")
+    skynet.call(addr,"lua","start")
+    即可接入 cluster 服务发现
+
+
+
+aoi a* 各种加密库均有现成的
+
+关于 moon
+    是一个基于 go 实现的与 skynetcluster 通信的节点，我将它用于skynet 的 httpclient 实现。
+    原项目为 https://github.com/Zwlin98/moon 我做了一点小小的改动，需要再放上来。

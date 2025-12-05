@@ -1,0 +1,6 @@
+*.so
+*.log
+*.dSYM
+pack/
+pack_safe/
+pack_unsafe/

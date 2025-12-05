@@ -1,0 +1,83 @@
+<div class="subpage">
+    <h1 class="page-title">服务器参数配置</h1>
+    
+    <div class="card">
+        <div class="card-header">
+            <h2>修改服务器参数</h2>
+        </div>
+        <div class="card-body">
+            <form id="config-form">
+                <div class="form-group">
+                    <label for="param-name" class="form-label">参数名称</label>
+                    <select id="param-name" class="form-input" required>
+                        <option value="">-- 请选择参数 --</option>
+                        <option value="max_players">最大玩家数</option>
+                        <option value="drop_rate">物品掉落率</option>
+                        <option value="exp_rate">经验倍率</option>
+                        <option value="maintenance">维护模式</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="param-value" class="form-label">参数值</label>
+                    <input type="text" id="param-value" class="form-input" placeholder="输入新的参数值" required>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-block">提交修改</button>
+                </div>
+            </form>
+            
+            <div class="response-area" id="response-area" style="margin-top: 20px; display: none;">
+                <h3>服务器响应</h3>
+                <pre id="response-content" style="background: #f8f9fa; padding: 15px; border-radius: 4px; overflow: auto;"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- <script>
+    // 表单提交处理
+    document.getElementById('config-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const paramName = document.getElementById('param-name').value;
+        const paramValue = document.getElementById('param-value').value;
+        
+        if (!paramName || !paramValue) {
+            alert('请填写完整的参数信息');
+            return;
+        }
+        
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '提交中...';
+        
+        try {
+            // 调用API提交数据
+            const response = await parent.fetchAPI('config', 'POST', {
+                parameter: paramName,
+                value: paramValue
+            });
+            
+            // 显示响应
+            const responseArea = document.getElementById('response-area');
+            const responseContent = document.getElementById('response-content');
+            
+            responseContent.textContent = JSON.stringify(response, null, 2);
+            responseArea.style.display = 'block';
+            
+            // 重置表单
+            document.getElementById('config-form').reset();
+            
+            // 显示成功提示
+            alert('参数修改成功!');
+        } catch (error) {
+            console.error('请求失败:', error);
+            alert('参数修改失败: ' + error.message);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '提交修改';
+        }
+    });
+</script> -->

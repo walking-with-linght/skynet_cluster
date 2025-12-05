@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏运营监控面板</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/modal-tune.css">
+    <style>
+        /* 认证页面样式 */
+        #auth-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #4361ee, #3a0ca3);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .auth-wrapper {
+            background: white;
+            border-radius: 10px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .auth-logo {
+            background: #4361ee;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .auth-content {
+            padding: 30px;
+        }
+        
+        .auth-footer {
+            text-align: center;
+            padding: 15px;
+            color: #666;
+            font-size: 0.8rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .auth-link {
+            color: #4361ee;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* 主应用默认隐藏 */
+        #app-container {
+            display: none;
+        }
+    </style>
+    
+</head>
+<body>
+    <!-- 认证容器 -->
+    <div id="auth-container">
+        <div class="auth-wrapper">
+            <div class="auth-logo">游戏运营中心</div>
+            <div id="auth-content"></div>
+            <div class="auth-footer">
+                © 2025 游戏运营团队 | v1.0.0
+            </div>
+        </div>
+    </div>
+
+    <!-- 主应用容器 -->
+    <div id="app-container" class="app-container">
+        <div class="sidebar">
+            <div class="logo">游戏运营中心</div>
+            <nav class="menu">
+                <a href="#" class="menu-item" data-page="online">
+                    <span class="icon">👥</span>
+                    <span class="text">在线玩家</span>
+                </a>
+                <a href="#" class="menu-item" data-page="server">
+                    <span class="icon">🖥️</span>
+                    <span class="text">服务器状态</span>
+                </a>
+                <a href="#" class="menu-item" data-page="config">
+                    <span class="icon">⚙️</span>
+                    <span class="text">参数配置</span>
+                </a>
+            </nav>
+            
+            <div class="user-section">
+                <div id="user-info" style="display: none;">
+                    <div class="user-avatar">👤</div>
+                    <div class="user-name" id="username-display"></div>
+                    <a href="#" class="menu-item" data-page="profile">
+                        <span class="icon">⚙️</span>
+                        <span class="text">个人中心</span>
+                    </a>
+                    <a href="#" id="logout-btn" class="menu-item">
+                        <span class="icon">🚪</span>
+                        <span class="text">退出登录</span>
+                    </a>
+                </div>
+                <div id="guest-info">
+                    <a href="#" class="menu-item" data-page="login">
+                        <span class="icon">🔑</span>
+                        <span class="text">登录/注册</span>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <div class="version">v1.0.0</div>
+                <div class="copyright">© 2025 游戏运营团队</div>
+            </div>
+        </div>
+        
+        <div class="main-content" id="content">
+            <div class="welcome-message">
+                <h1>欢迎使用游戏运营监控面板</h1>
+                <p>请登录或从左侧菜单选择功能</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 全局弹窗 -->
+    <div id="global-modal" class="modal">
+        <div class="modal-content" id="modal-content"></div>
+    </div>
+
+    <script src="/static/js/echarts.min.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/online.js"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</body>
+</html>
