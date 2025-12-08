@@ -59,7 +59,7 @@ endif
 JE_MALLOC_INC := $(SKYNET_ROOT)3rd/jemalloc/include/jemalloc
 JE_MALLOC_LIB := $(SKYNET_ROOT)3rd/jemalloc/lib/libjemalloc_pic.a
 
-MCSERVICE = skiplist time aoi rand openssl cjson tz lcrypt pb consistenthash lfs
+MCSERVICE = skiplist time aoi rand openssl cjson tz lcrypt pb consistenthash lfs gzip
 all :  $(foreach v, $(MCSERVICE), $(MCSERVICE_PATH)$(v).so) \
 	$(MCSERVICE_PATH)lutil.so \
 	$(MCSERVICE_PATH)lkcp.so \
@@ -126,6 +126,30 @@ $(MCSERVICE_PATH)consistenthash.so : lua-consistent-hash/consistenthash.c | $(MC
 
 $(MCSERVICE_PATH)lfs.so : lua-lfs/src/lfs.c | $(MCSERVICE_PATH)
 	$(CC) $(CFLAGS) $(SHARED) -Ilua-lfs/src $^ -o $@
+
+# gzip - 使用 zlib（优先使用系统 zlib，否则编译子模块中的 zlib）
+ZLIB_DIR := lua-gzip/zlib
+
+# 检测系统是否有 zlib（macOS 和 Linux 通常都有）
+ifeq ($(UNAME_S),Darwin)
+    # macOS 使用系统 zlib
+    ZLIB_INC := /usr/include
+    ZLIB_LINK := -lz
+else
+    # Linux 尝试使用系统 zlib
+    ZLIB_INC := /usr/include
+    ZLIB_LINK := -lz
+endif
+
+# 确保 zlib 子模块已初始化（用于头文件）
+$(ZLIB_DIR)/zlib.h:
+	@if [ ! -f "$(ZLIB_DIR)/zlib.h" ]; then \
+		cd lua-gzip && git submodule update --init --recursive; \
+	fi
+
+# 编译 gzip.so，使用系统 zlib 或子模块中的 zlib 头文件
+$(MCSERVICE_PATH)gzip.so : lua-gzip/lgzip.c $(ZLIB_DIR)/zlib.h | $(MCSERVICE_PATH)
+	$(CC) $(CFLAGS) $(SHARED) -I$(ZLIB_DIR) $< -o $@ $(ZLIB_LINK)
 
 clean :
 	rm -f $(MCSERVICE_PATH)*.so

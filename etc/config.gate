@@ -1,0 +1,20 @@
+include "config.common"
+
+start = "gate_main"	-- main script
+
+-- 节点信息
+cluster_type = "gate"
+cluster_name = "gate"
+cluster_addr = "127.0.0.1:29110"
+
+-- 开启debug
+console_port = 29111
+port = 8004
+maxclient = 10000
+use_ssl = false
+-- json protobuf3 sproto
+protocol = json
+platform = macos
+
+luaservice = luaservice .. "./server/" .. cluster_type .. "/?.lua;"
+lua_path =  lua_path .. "./server/" .. cluster_type .. "/lualib/?.lua;"

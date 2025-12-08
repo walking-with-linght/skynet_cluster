@@ -31,6 +31,68 @@ local log_head = {
 	[ERROR_LEVEL]   = "[ERROR]",	
 }
 
+-- ANSI 颜色代码
+local ESC = string.char(27, 91)
+local RESET = ESC .. '0m'
+
+-- 检测是否支持颜色输出（针对 Ubuntu 和 Mac 平台）
+local function supports_color()
+	local platform = skynet.getenv("platform")
+	local daemon = skynet.getenv("daemon")
+	
+	-- daemon 模式下不使用颜色
+	if daemon then
+		return false
+	end
+	
+	-- Windows 平台不支持 ANSI 颜色
+	if platform == "windows" then
+		return false
+	end
+	
+	-- 检测 TERM 环境变量
+	-- 如果 TERM 存在且不是 "dumb"，通常支持颜色
+	local ok, term = pcall(os.getenv, "TERM")
+	if ok and term and term ~= "dumb" then
+		return true
+	end
+	
+	-- macOS 平台默认支持颜色
+	if platform == "darwin" or platform == "macos" then
+		return true
+	end
+	
+	-- Ubuntu/Linux 平台默认支持颜色
+	if platform == "linux" or not platform then
+		return true
+	end
+	
+	-- 其他 Unix 系统默认支持
+	return true
+end
+
+local COLOR_ENABLED = supports_color()
+
+-- 日志级别对应的颜色
+local LOG_COLOR = {
+	[TEST_LEVEL]    = ESC .. '36m',  -- 青色 (Cyan)
+	[DEBUG_LEVEL]   = ESC .. '34m',  -- 蓝色 (Blue)
+	[RELEASE_LEVEL] = ESC .. '32m',  -- 绿色 (Green)
+	[ERROR_LEVEL]   = ESC .. '31m',  -- 红色 (Red)
+}
+
+-- 为日志消息添加颜色（仅用于控制台输出，不用于文件）
+local function add_color(level, msg)
+	if not COLOR_ENABLED then
+		return msg
+	end
+	local color_code = LOG_COLOR[level]
+	if not color_code then
+		return msg
+	end
+	return color_code .. msg .. RESET
+end
+
 local function save_log(level, ... )
 	local date = os.date("*t")
 	if date.yday ~= G_CURR_DATE then
@@ -72,11 +134,22 @@ local function log(source,level, ... )
 	source = source or 0
 	local tt = {string.format("[%s][%s]",skynet.getenv('cluster_name'),os.date("%Y-%m-%d %H:%M:%S")),lformat("[%08x]",source),log_head[level],...}
 	local temp = table.concat( tt, " ")
+	
+	-- 文件日志使用原始消息（不含颜色代码）
 	if G_SAVE_LOG then
 		save_log(level,temp,"\r\n")
-		print(temp,"\r\n")
+	end
+	
+	-- 控制台输出添加颜色（如果支持）
+	local console_msg = temp
+	if COLOR_ENABLED then
+		console_msg = add_color(level, temp)
+	end
+	
+	if G_SAVE_LOG then
+		print(console_msg,"\r\n")
 	else
-		print(temp)
+		print(console_msg)
 	end
 end
 
