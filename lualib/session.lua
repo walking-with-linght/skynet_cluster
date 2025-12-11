@@ -30,17 +30,17 @@ function M.check_session(session)
     )
     if not ok then
         print("session decrypt error", err)
-        return 1, "无效的session"
+        return 6, "无效的session"
     end
     local d = string.split(decrypted, "|")
     if #d ~= 2 then
         print("session format error", decrypted)
-        return 2, "无效的session"
+        return 6, "无效的session"
     end
     local time,uid = d[1], d[2]
     if tonumber(time) < os.time() - validTime then
         print("session expired", time, os.time())
-        return 3, "session已过期"
+        return 6, "session已过期"
     end
     return 0, tonumber(uid)
 end

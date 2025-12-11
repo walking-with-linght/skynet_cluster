@@ -219,7 +219,19 @@ end
 function CMD.publish(channel, data)
 	db:publish(channel, data)
 end
+--[[
+	pipeline示例
+    local ops = {}
+    table.insert(ops, {"hset", "monitor_online_data", data.mode, jdata})
+    table.insert(ops, {"hset", "monitor_online_history_data:" .. data.mode, idx , jdata})
+    --保留10000条
+    idx = idx - 10000
+    if idx > 0  then
+        table.insert(ops, {"hdel","monitor_online_history_data:" .. data.mode, idx})
+    end
+    skynet.call(".redis","lua","pipeline",ops,{})
 
+]]
 skynet.start(function()
 	skynet.dispatch("lua", function(session, source, cmd, ...)
 		print("redis pool cmd",cmd)

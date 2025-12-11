@@ -23,9 +23,10 @@ REQUEST["/account/register"] = function(path, method, header, body, query)
 	end
 
 	-- 看下 redis 有没有数据，如果有直接返回错误，没有再查一次 mysql
-	local redis_key = string.format("account:%s", username)
-	local user_data = skynet.call(".redis", "lua", "EXISTS", redis_key)
-	if user_data then
+	local username_redis_key = string.format("username:%s", username)
+	local user_data = skynet.call(".redis", "lua", "EXISTS", username_redis_key)
+	print(user_data,"user_data EXISTS")
+	if user_data ~= 0 then
 		return 200, {
 			code = error_code.account_already_exists,
 			errmsg = "账号已存在",
@@ -33,18 +34,18 @@ REQUEST["/account/register"] = function(path, method, header, body, query)
 	end
 
 	-- 查一次 mysql
-	local ok,mysql_data = skynet.call(".mysql", "lua", "select_one_by_key", "tb_user_info", "username", username)
-	if ok and mysql_data and next(mysql_data) then
-		print(dump(mysql_data),"mysql_cache")
-		skynet.call(".redis", "lua", "hmset", redis_key, mysql_data)
-		return 200, {
-			code = error_code.account_already_exists,
-			errmsg = "账号已存在",
-		}
-	end
+	-- local ok,mysql_data = skynet.call(".mysql", "lua", "select_one_by_key", "tb_user_info", "username", username)
+	-- if ok and mysql_data and next(mysql_data) then
+	-- 	print(dump(mysql_data),"mysql_cache")
+	-- 	skynet.call(".redis", "lua", "hmset", username_redis_key, mysql_data)
+	-- 	return 200, {
+	-- 		code = error_code.account_already_exists,
+	-- 		errmsg = "账号已存在",
+	-- 	}
+	-- end
 	local passcode = utils.random_string(8)
 	local now = os.time()
-	local uid = 9--tonumber(skynet.call(".redis", "lua", "incr", "uid_seq"))
+	local uid = tonumber(skynet.call(".redis", "lua", "incr", "uid_seq"))
 	local user = {
 		uid = uid,
 		hardware = hardware,
@@ -55,10 +56,16 @@ REQUEST["/account/register"] = function(path, method, header, body, query)
 		mtime = os.date('%Y-%m-%d %H:%M:%S', now),
 		status = 0,
 	}
-	skynet.call(".redis", "lua", "hmset", redis_key, user)
+	local uid_redis_key = string.format("uid:%s", uid)
+
+	local ops = {}
+    table.insert(ops, {"set", username_redis_key, uid} )
+    table.insert(ops, {"hmset", uid_redis_key, table.redis_unpack(user)} )
+    skynet.call(".redis","lua","pipeline",ops,{})
 	-- 插入一条数据
-	local resultid = skynet.call(".mysql", "lua", "insert", "tb_user_info", user)
-	print(resultid,"resultid")
+	skynet.send(".mysql", "lua", "insert", "tb_user_info", user)
+	-- local ok,resultid = skynet.call(".mysql", "lua", "insert", "tb_user_info", user)
+	-- print(ok,resultid,"注册结果")
 
 	return 200, {
 		code = error_code.success,

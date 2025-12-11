@@ -42,12 +42,17 @@ function client.init()
 
     CMD.reload_protocol()
 end
+local self_node = nil
 function client:pack_self()
-    return {
-        node = skynet.getenv("cluster_type"),
-        addr = skynet.self(),
-        client = self.id,
-    }
+    if not self_node then
+        self_node = {
+            node = skynet.getenv("cluster_type"),
+            addr = skynet.self(),
+            client = self.id,
+            fd = self.fd,
+        }
+    end
+    return self_node
 end
 
 function CMD.reload_protocol()
@@ -123,7 +128,7 @@ function client:on_connect(fd, addr)
 
     self.gate_link = {
         node = skynet.getenv("cluster_type"),
-        agent = skynet.self(),
+        addr = skynet.self(),
         fd = self.fd,
         ip = self.ip,
         id = self.id,
@@ -209,17 +214,24 @@ end
 function client:on_disconnect()
     self._dis_connected = true
     if self.game_link then
-        cluster.send(self.game_link.node,"agent_manager","disconnect",self.pid,self.rid)
+        CMD.cluster_send(self.game_link.node, ".agent_manager", "disconnect", self.rid)
     end
 
 end
 
 -- 游戏服创建好了agent
-function client:update_game_agent(agent, rid)
+function client:update_game_link(game_link, rid)
 
-    self.game_link.agent = agent
+    self.game_link = game_link
     self.rid = rid
-    rlog("更新玩家agent和所选角色rid",agent, rid)
+    rlog("更新玩家agent和所选角色rid", rid)
+end
+-- 登录结果
+function client:update_login_state(user, state)
+
+    self.login_state = state
+    self.user = user
+    rlog("更新玩家登录状态", user.username, user.uid, state)
 end
 
 function client:send_package(pack)
@@ -228,7 +240,7 @@ function client:send_package(pack)
 
     if self.fd then
         -- 根据加密文档：序列化 -> 加密（如果已握手）-> 压缩 -> 发送
-        
+        dlog("发送消息", pack)
         -- 1. 加密（如果已握手且不是握手消息）
         if self.proto_key and string.len(pack) > 0 and self.handshake then
             
@@ -253,7 +265,7 @@ function client:send_package(pack)
             elog("Gzip压缩失败")
             return
         end
-
+        
         -- 3. 发送
         websocket.write(self.fd, compressed, "binary")
     end
@@ -433,7 +445,7 @@ function client:on_request(msg, sz)
             msg = decrypted
             sz = #msg
         else
-            elog("AES解密失败", err, "key长度", #self.proto_key, "消息长度", sz)
+            elog("AES解密失败", err, self.proto_key, msg)
         end
         
     elseif self.proto_key and sz > 0 and not self.handshake then
@@ -467,9 +479,25 @@ function client:on_request(msg, sz)
             })
         return
     end
+    if not protoid[data.name] then
+        elog("协议不存在",data.name)
+        return
+    end
     local node = protoid[data.name].node
     local addr = protoid[data.name].addr
-    CMD.cluster_send(node,addr,"dispatch_request",data,self:pack_self())
+    data.ip = self.ip
+
+    self:dispatch_request(data.name, data)
+    -- if not self.login then
+    --     -- 没有登录直接发到登录服
+    --     CMD.cluster_send(node,addr,"dispatch_request",data,self:pack_self())
+    --     return
+    -- end
+    -- if not self.game_link then
+    --     -- 已登录但没有进入到游戏
+    --     CMD.cluster_send(node,addr,"dispatch_request",data,self:pack_self())
+    --     return
+    -- end
     -- if err_code ~= error_code.success then
     --     elog("协议解析错误",err_code, self.pid)
     --     self._forbid_request = true
@@ -617,7 +645,7 @@ function client:send_response(_resp_id, _data, _not_del_id)
 end
 
 -- 客户端消息分发
-function client:dispatch_request(name, args, _resp_id)
+function client:dispatch_request(name, data, _resp_id)
 
     if self._forbid_request or self._dis_connected then return end
 
@@ -630,7 +658,7 @@ function client:dispatch_request(name, args, _resp_id)
         elog(string.format(
                            "error:request too much , max is %d ,but %d!",
                            DATA.max_request_rate, self.__limit_request_counter))
-        self:response2client(name, {result = error_code.msg_times_limit}, _resp_id)
+        -- self:response2client(name, {result = error_code.msg_times_limit}, _resp_id)
         self._wait_kick = true
         self._forbid_request = true
         return
@@ -640,21 +668,23 @@ function client:dispatch_request(name, args, _resp_id)
 
     local ok, continue_transmit = true, true
     if _func then
-        ok, continue_transmit = pcall(_func, self, args)
+        ok, continue_transmit = pcall(_func, self, data)
         if not ok then
             elog("网关预处理报错", continue_transmit)
         end
     end
     if continue_transmit then
+        if not self.login_state then
+            -- 没登录，发到登录服
+            CMD.cluster_send_by_type("login", ".login_manager", "client_request", data , self:pack_self())
+            return
+        end
         if self.game_link then
-            if self.game_link.agent then
-                cluster.send(self.game_link.node, self.game_link.agent, "request",
-                     self.pid, name, args, _resp_id)
-            else
-                cluster.send(self.game_link.node, "agent_manager", "request",
-                     self.pid, name, args, _resp_id)
+            if self.game_link.addr then
+                CMD.cluster_send(self.game_link.node, self.game_link.addr, "client_request", data , self:pack_self())
             end
         end
+        CMD.cluster_send_by_type("game", ".agent_manager", "client_request", data, self:pack_self())
     end
 
 end
@@ -662,6 +692,17 @@ end
 ----------------------网关预处理------------------------------------------
 -- 返回true时消息继续转发到agent
 
-function client.req:client_breakdown_info(_response_id, data) end
+function client.req:heartbeat(data) 
+     -- print("收到心跳消息", data.msg.ctime, time.gettime())
+     local now = math.floor(time.gettime() / 10)
+     self.heartbeat_time = os.time()
+     self:send2client(
+         {
+             name = protoid.heartbeat.cmd, 
+             msg = {ctime = data.msg.ctime, stime = now}, 
+             code = error_code.success, 
+             seq = data.seq
+         })
+end
 
 return client

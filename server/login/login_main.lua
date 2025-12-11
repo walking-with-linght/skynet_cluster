@@ -36,7 +36,7 @@ skynet.start(function()
 		handle = "slg_login"
 	})
 
-	skynet.newservice("msg_manager")
+	skynet.newservice("login_manager")
 
 
 

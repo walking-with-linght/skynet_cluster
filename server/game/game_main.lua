@@ -26,7 +26,7 @@ skynet.start(function()
 	})
 
     
-	skynet.newservice("msg_manager")
+	skynet.newservice("agent_manager")
 
 
 

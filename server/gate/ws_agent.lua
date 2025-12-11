@@ -128,21 +128,38 @@ end
 
 
 -------------------------对外命令---------------------------------------
-function CMD.update_game_agent(client_id, agent, rid)
+function CMD.update_game_link(client_id, game_link, rid)
 	if not client_id then
-		elog("gate_agent CMD.update_game_agent client_id is nil :"..tostring(client_id) )
+		elog("gate_agent CMD.update_game_link client_id is nil :"..tostring(client_id) )
 		return
 	end
 
 	local _client = id_clients[client_id]
 
 	if not _client then
-		elog(string.format("gate_agent CMD.update_game_agent client_id '%s' is not exists !",tostring(client_id)))
+		elog(string.format("gate_agent CMD.update_game_link client_id '%s' is not exists !",tostring(client_id)))
 		return
 	end
 
-	_client:update_game_agent(agent, rid)
+	_client:update_game_link(game_link, rid)
 end
+
+function CMD.update_login_state(client_id, user, state)
+	if not client_id then
+		elog("gate_agent CMD.update_login_state client_id is nil :"..tostring(client_id) )
+		return
+	end
+
+	local _client = id_clients[client_id]
+
+	if not _client then
+		elog(string.format("gate_agent CMD.update_login_state client_id '%s' is not exists !",tostring(client_id)))
+		return
+	end
+
+	_client:update_login_state(user,state)
+end
+
 
 function CMD.send2client(client_id,data)
 	if not client_id then

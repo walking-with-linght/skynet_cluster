@@ -20,7 +20,7 @@ return {
     ["role.enterServer"] = {
         cmd = "role.enterServer",
         node = "game",
-        addr = ".game_manager"
+        addr = ".agent_manager"
     },
     -- 创建角色
     ["role.create"] = {
